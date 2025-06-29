@@ -10,7 +10,8 @@ import { HypothesisGenerator } from "../components/HypothesisGenerator";
 import { KnowledgeGraph } from "../components/KnowledgeGraph";
 import { NFTBadges } from "../components/NFTBadges";
 import { AnalyticsCharts } from "../components/AnalyticsCharts";
-import { Brain, Sparkles, Network, Trophy } from "lucide-react";
+import { ChainlinkHypothesisValidator } from "../components/ChainlinkHypothesisValidator";
+import { Brain, Sparkles, Network, Trophy, Link } from "lucide-react";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("generate");
@@ -125,13 +126,20 @@ const Home = () => {
 
         {/* Main Content - Responsive Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-orange-100/80 dark:bg-orange-900/50 backdrop-blur-sm h-auto p-1">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-orange-100/80 dark:bg-orange-900/50 backdrop-blur-sm h-auto p-1">
             <TabsTrigger 
               value="generate" 
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs sm:text-sm py-2 px-2 sm:px-4"
             >
               <span className="hidden sm:inline">Generate</span>
               <span className="sm:hidden">Gen</span>
+            </TabsTrigger>
+            <TabsTrigger 
+              value="chainlink" 
+              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs sm:text-sm py-2 px-2 sm:px-4"
+            >
+              <span className="hidden sm:inline">Chainlink</span>
+              <span className="sm:hidden">Link</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -157,6 +165,10 @@ const Home = () => {
           
           <TabsContent value="generate" className="mt-4 sm:mt-6">
             <HypothesisGenerator />
+          </TabsContent>
+          
+          <TabsContent value="chainlink" className="mt-4 sm:mt-6">
+            <ChainlinkHypothesisValidator />
           </TabsContent>
           
           <TabsContent value="analytics" className="mt-4 sm:mt-6">
