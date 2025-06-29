@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useScaffoldContract, useScaffoldContractRead, useScaffoldContractWrite } from "~~/hooks/scaffold-eth";
+import { useScaffoldContract, useScaffoldReadContract, useScaffoldWriteContract } from "~~/hooks/scaffold-eth";
 import { useAccount } from "wagmi";
 import { Button } from "~~/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "~~/components/ui/card";
@@ -34,27 +34,25 @@ export function ChainlinkHypothesisValidator() {
   });
 
   // Read user's hypotheses
-  const { data: userHypothesesData, refetch: refetchUserHypotheses } = useScaffoldContractRead({
+  const { data: userHypothesesData, refetch: refetchUserHypotheses } = useScaffoldReadContract({
     contractName: "ChainlinkHypothesisValidator",
     functionName: "getResearcherHypotheses",
     args: [address],
   });
 
   // Read badge types
-  const { data: badgeTypesData } = useScaffoldContractRead({
+  const { data: badgeTypesData } = useScaffoldReadContract({
     contractName: "ChainlinkHypothesisValidator",
     functionName: "getBadgeTypes",
   });
 
   // Write functions
-  const { writeAsync: submitHypothesis, isLoading: isSubmitting } = useScaffoldContractWrite({
+  const { writeContractAsync: submitHypothesis, isMining: isSubmitting } = useScaffoldWriteContract({
     contractName: "ChainlinkHypothesisValidator",
-    functionName: "submitHypothesis",
   });
 
-  const { writeAsync: requestBadge, isLoading: isRequestingBadge } = useScaffoldContractWrite({
+  const { writeContractAsync: requestBadge, isMining: isRequestingBadge } = useScaffoldWriteContract({
     contractName: "ChainlinkHypothesisValidator",
-    functionName: "requestBadgeAssignment",
   });
 
   // Update state when data changes
