@@ -1,17 +1,17 @@
 "use client";
 
-import { useRouter } from "next/router";
 import { useEffect } from "react";
+import { usePathname } from "next/navigation";
 
 const NotFound = () => {
-  const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
     console.error(
       "404 Error: User attempted to access non-existent route:",
-      router.asPath
+      pathname
     );
-  }, [router.asPath]);
+  }, [pathname]);
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -26,4 +26,4 @@ const NotFound = () => {
   );
 };
 
-export default NotFound;
+export default NotFound; 

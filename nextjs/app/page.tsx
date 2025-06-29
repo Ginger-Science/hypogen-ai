@@ -1,17 +1,16 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import { Button } from "../components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
-import { Badge } from "../components/ui/badge";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
-import { ThemeToggle } from "../components/ThemeToggle";
-import { HypothesisGenerator } from "../components/HypothesisGenerator";
-import { KnowledgeGraph } from "../components/KnowledgeGraph";
-import { NFTBadges } from "../components/NFTBadges";
-import { AnalyticsCharts } from "../components/AnalyticsCharts";
-import { ChainlinkHypothesisValidator } from "../components/ChainlinkHypothesisValidator";
-import { Brain, Sparkles, Network, Trophy, Link } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemeToggle } from "@/components/ThemeToggle";
+import { HypothesisGenerator } from "@/components/HypothesisGenerator";
+import { KnowledgeGraph } from "@/components/KnowledgeGraph";
+import { NFTBadges } from "@/components/NFTBadges";
+import { AnalyticsCharts } from "@/components/AnalyticsCharts";
+import { Brain, Sparkles, Network, Trophy } from "lucide-react";
 
 const Home = () => {
   const [activeTab, setActiveTab] = useState("generate");
@@ -78,10 +77,10 @@ const Home = () => {
         <div className="flex flex-col space-y-4 sm:space-y-0 sm:flex-row sm:justify-between sm:items-center mb-6 sm:mb-8">
           <div className="text-center sm:text-left">
             <h1 className="text-2xl sm:text-3xl lg:text-4xl xl:text-5xl font-bold text-orange-800 dark:text-orange-200 mb-1 sm:mb-2">
-              🧬 Ginger Science
+              🧬 HypoGen AI
             </h1>
             <p className="text-orange-600 dark:text-orange-300 text-xs sm:text-sm lg:text-base">
-              AI-Powered Research Platform
+              AI-Powered Research Platform on Chainlink
             </p>
           </div>
           <div className="flex items-center justify-center sm:justify-end gap-2">
@@ -126,20 +125,13 @@ const Home = () => {
 
         {/* Main Content - Responsive Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-5 bg-orange-100/80 dark:bg-orange-900/50 backdrop-blur-sm h-auto p-1">
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 bg-orange-100/80 dark:bg-orange-900/50 backdrop-blur-sm h-auto p-1">
             <TabsTrigger 
               value="generate" 
               className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs sm:text-sm py-2 px-2 sm:px-4"
             >
               <span className="hidden sm:inline">Generate</span>
               <span className="sm:hidden">Gen</span>
-            </TabsTrigger>
-            <TabsTrigger 
-              value="chainlink" 
-              className="data-[state=active]:bg-orange-500 data-[state=active]:text-white text-xs sm:text-sm py-2 px-2 sm:px-4"
-            >
-              <span className="hidden sm:inline">Chainlink</span>
-              <span className="sm:hidden">Link</span>
             </TabsTrigger>
             <TabsTrigger 
               value="analytics" 
@@ -165,10 +157,6 @@ const Home = () => {
           
           <TabsContent value="generate" className="mt-4 sm:mt-6">
             <HypothesisGenerator />
-          </TabsContent>
-          
-          <TabsContent value="chainlink" className="mt-4 sm:mt-6">
-            <ChainlinkHypothesisValidator />
           </TabsContent>
           
           <TabsContent value="analytics" className="mt-4 sm:mt-6">
