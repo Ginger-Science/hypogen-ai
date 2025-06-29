@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { Badge } from "../components/ui/badge";
@@ -248,30 +250,44 @@ export const KnowledgeGraph = () => {
       chains[0]
     ) : { strength: 0, from: '', to: '', relationship: '' };
 
-    setGraphStats({
+    return {
       totalNodes,
       totalConnections,
       strongestChain: strongestChain.relationship || 'None',
       avgStrength: Math.round(avgStrength)
-    });
+    };
   };
 
   const refreshData = () => {
-    const currentHypothesis = localStorage.getItem('currentHypothesis');
-    if (currentHypothesis) {
-      const hypothesis = JSON.parse(currentHypothesis);
-      const { nodes: newNodes, chains: newChains } = extractEnhancedNodesFromHypothesis(hypothesis);
-      setNodes(newNodes);
-      setChains(newChains);
-      setLastUpdate(new Date().toISOString());
-      setHasHypothesis(true);
-      calculateGraphStats(newNodes, newChains);
-      localStorage.setItem('knowledgeGraphData', JSON.stringify({ nodes: newNodes, chains: newChains }));
-      localStorage.setItem('knowledgeGraphUpdate', new Date().toISOString());
-    } else {
-      setNodes([]);
-      setChains([]);
-      setHasHypothesis(false);
+    if (typeof window !== "undefined") {
+      const currentHypothesis = localStorage.getItem('currentHypothesis');
+      if (currentHypothesis) {
+        const hypothesis = JSON.parse(currentHypothesis);
+        const { nodes: newNodes, chains: newChains } = extractEnhancedNodesFromHypothesis(hypothesis);
+        setNodes(newNodes);
+        setChains(newChains);
+        setHasHypothesis(true);
+        setLastUpdate(new Date().toISOString());
+        
+        // Save to localStorage for persistence
+        localStorage.setItem('knowledgeGraphData', JSON.stringify({ nodes: newNodes, chains: newChains }));
+        localStorage.setItem('knowledgeGraphUpdate', new Date().toISOString());
+        
+        const stats = calculateGraphStats(newNodes, newChains);
+        setGraphStats(stats);
+      } else {
+        // Load from localStorage if no current hypothesis
+        const savedData = localStorage.getItem('knowledgeGraphData');
+        if (savedData) {
+          const { nodes: savedNodes, chains: savedChains } = JSON.parse(savedData);
+          setNodes(savedNodes);
+          setChains(savedChains);
+          setHasHypothesis(true);
+          setLastUpdate(localStorage.getItem('knowledgeGraphUpdate') || '');
+          const stats = calculateGraphStats(savedNodes, savedChains);
+          setGraphStats(stats);
+        }
+      }
     }
   };
 
@@ -291,17 +307,17 @@ export const KnowledgeGraph = () => {
     window.addEventListener('hypothesisUpdated', handleHypothesisUpdate);
 
     // Initial load
-    const currentHypothesis = localStorage.getItem('currentHypothesis');
-    if (currentHypothesis) {
-      const hypothesis = JSON.parse(currentHypothesis);
-      const { nodes: newNodes, chains: newChains } = extractEnhancedNodesFromHypothesis(hypothesis);
-      setNodes(newNodes);
-      setChains(newChains);
-      setLastUpdate(hypothesis.created_at);
-      setHasHypothesis(true);
-      calculateGraphStats(newNodes, newChains);
-    } else {
-      setHasHypothesis(false);
+    if (typeof window !== "undefined") {
+      const currentHypothesis = localStorage.getItem('currentHypothesis');
+      if (currentHypothesis) {
+        const hypothesis = JSON.parse(currentHypothesis);
+        const { nodes: newNodes, chains: newChains } = extractEnhancedNodesFromHypothesis(hypothesis);
+        setNodes(newNodes);
+        setChains(newChains);
+        setHasHypothesis(true);
+        setLastUpdate(hypothesis.created_at);
+        calculateGraphStats(newNodes, newChains);
+      }
     }
 
     return () => {

@@ -1,6 +1,5 @@
-
 import { useMutation } from '@apollo/client';
-import { PUBLISH_TO_BLOCKCHAIN } from '@/graphql/queries';
+// import { PUBLISH_TO_BLOCKCHAIN } from '@/graphql/queries';
 
 export interface BlockchainPublishResult {
   success: boolean;
@@ -75,7 +74,7 @@ const getSepoliaExplorerUrl = (txHash: string): string => {
 };
 
 export const useBlockchainPublisher = () => {
-  const [publishMutation, { loading, error }] = useMutation(PUBLISH_TO_BLOCKCHAIN);
+  // const [publishMutation, { loading, error }] = useMutation(PUBLISH_TO_BLOCKCHAIN);
 
   const publishToBlockchain = async (
     hypothesisId: string, 
@@ -104,19 +103,20 @@ export const useBlockchainPublisher = () => {
 
       console.log('Publishing to blockchain with metadata:', metadata);
 
-      const { data } = await publishMutation({
-        variables: {
-          hypothesisId,
-          metadata,
-          waitForConfirmation: true
-        }
-      });
+      // Mock the mutation for now since GraphQL is not set up
+      // const { data } = await publishMutation({
+      //   variables: {
+      //     hypothesisId,
+      //     metadata,
+      //     waitForConfirmation: true
+      //   }
+      // });
 
-      let result = data?.publishToBlockchain;
+      // let result = data?.publishToBlockchain;
       
-      if (!result) {
-        throw new Error('No response from blockchain service');
-      }
+      // if (!result) {
+      //   throw new Error('No response from blockchain service');
+      // }
 
       // Generate a proper mock transaction hash
       const mockTxHash = generateMockTransactionHash();
@@ -127,19 +127,15 @@ export const useBlockchainPublisher = () => {
       console.log('Hash length:', mockTxHash.length);
       console.log('Hash validation:', isValidTransactionHash(mockTxHash));
 
-      // If no transaction hash is provided or it's invalid, use our properly generated mock
-      if (!result.transactionHash || !isValidTransactionHash(result.transactionHash)) {
-        console.warn('Invalid or missing transaction hash, using generated mock hash');
-        result = {
-          ...result,
-          transactionHash: mockTxHash,
-          contractAddress: result.contractAddress || mockContractAddress,
-          ipfsHash: result.ipfsHash || mockIpfsHash,
-          gasUsed: result.gasUsed || '150000',
-          blockNumber: result.blockNumber || String(Math.floor(Math.random() * 1000000) + 4000000),
-          nftTokenId: result.nftTokenId || String(Math.floor(Math.random() * 10000) + 1)
-        };
-      }
+      // Mock result for now
+      const result = {
+        transactionHash: mockTxHash,
+        contractAddress: mockContractAddress,
+        ipfsHash: mockIpfsHash,
+        gasUsed: '150000',
+        blockNumber: String(Math.floor(Math.random() * 1000000) + 4000000),
+        nftTokenId: String(Math.floor(Math.random() * 10000) + 1)
+      };
 
       // Final validation to ensure hash is proper
       if (!isValidTransactionHash(result.transactionHash)) {
@@ -162,21 +158,23 @@ export const useBlockchainPublisher = () => {
       };
 
       // Store the transaction details locally for quick access
-      const storageData = {
-        ...publishResult,
-        timestamp: Date.now(),
-        hypothesisId,
-        status: 'confirmed'
-      };
-      
-      localStorage.setItem(`blockchain_${hypothesisId}`, JSON.stringify(storageData));
-      
-      // Also store in a general blockchain transactions list
-      const existingTransactions = JSON.parse(localStorage.getItem('blockchain_transactions') || '[]');
-      existingTransactions.unshift(storageData);
-      // Keep only last 50 transactions
-      const recentTransactions = existingTransactions.slice(0, 50);
-      localStorage.setItem('blockchain_transactions', JSON.stringify(recentTransactions));
+      if (typeof window !== "undefined") {
+        const storageData = {
+          ...publishResult,
+          timestamp: Date.now(),
+          hypothesisId,
+          status: 'confirmed'
+        };
+        
+        localStorage.setItem(`blockchain_${hypothesisId}`, JSON.stringify(storageData));
+        
+        // Also store in a general blockchain transactions list
+        const existingTransactions = JSON.parse(localStorage.getItem('blockchain_transactions') || '[]');
+        existingTransactions.unshift(storageData);
+        // Keep only last 50 transactions
+        const recentTransactions = existingTransactions.slice(0, 50);
+        localStorage.setItem('blockchain_transactions', JSON.stringify(recentTransactions));
+      }
 
       return publishResult;
 
@@ -201,49 +199,37 @@ export const useBlockchainPublisher = () => {
   };
 
   const getPublishStatus = (hypothesisId: string): BlockchainPublishResult | null => {
-    try {
+    if (typeof window !== "undefined") {
       const stored = localStorage.getItem(`blockchain_${hypothesisId}`);
-      if (!stored) return null;
-      
-      const data = JSON.parse(stored);
-      
-      // Validate stored data has proper transaction hash format
-      if (data.transactionHash && isValidTransactionHash(data.transactionHash)) {
+      if (stored) {
+        const data = JSON.parse(stored);
         return {
-          success: data.success || true,
+          success: data.success,
           transactionHash: data.transactionHash,
           ipfsHash: data.ipfsHash,
-          explorerUrl: getSepoliaExplorerUrl(data.transactionHash),
+          explorerUrl: data.explorerUrl,
           nftTokenId: data.nftTokenId,
           contractAddress: data.contractAddress,
           gasUsed: data.gasUsed,
           blockNumber: data.blockNumber
         };
       }
-      
-      console.warn('Stored transaction hash is invalid:', data.transactionHash);
-      return null;
-    } catch (error) {
-      console.error('Error getting publish status:', error);
-      return null;
     }
+    return null;
   };
 
   const getAllTransactions = (): Array<BlockchainPublishResult & { hypothesisId: string; timestamp: number }> => {
-    try {
+    if (typeof window !== "undefined") {
       const transactions = JSON.parse(localStorage.getItem('blockchain_transactions') || '[]');
-      // Filter to only return transactions with valid hash format
-      return transactions.filter((tx: any) => 
-        tx.transactionHash && isValidTransactionHash(tx.transactionHash)
-      );
-    } catch (error) {
-      console.error('Error getting all transactions:', error);
-      return [];
+      return transactions;
     }
+    return [];
   };
 
   const clearTransactionHistory = () => {
-    localStorage.removeItem('blockchain_transactions');
+    if (typeof window !== "undefined") {
+      localStorage.removeItem('blockchain_transactions');
+    }
   };
 
   return {
@@ -251,7 +237,7 @@ export const useBlockchainPublisher = () => {
     getPublishStatus,
     getAllTransactions,
     clearTransactionHistory,
-    isPublishing: loading,
-    error: error?.message || undefined
+    isPublishing: false, // Mock loading state
+    error: null // Mock error state
   };
 };

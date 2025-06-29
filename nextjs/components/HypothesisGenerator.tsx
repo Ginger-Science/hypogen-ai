@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState } from 'react';
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
@@ -28,8 +30,11 @@ export const HypothesisGenerator = () => {
   const [loading, setLoading] = useState(false);
   const [customTopic, setCustomTopic] = useState('');
   const [hypothesis, setHypothesis] = useState<Hypothesis | null>(() => {
-    const saved = localStorage.getItem('currentHypothesis');
-    return saved ? JSON.parse(saved) : null;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem('currentHypothesis');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
   });
   const { toast } = useToast();
   const { address: connectedAddress } = useAccount();
@@ -102,25 +107,27 @@ export const HypothesisGenerator = () => {
   };
 
   const updateRelatedData = (newHypothesis: Hypothesis) => {
-    // Update stats in main page
-    const statsUpdate = {
-      hypotheses: parseInt(localStorage.getItem('totalHypotheses') || '0') + 1,
-      insights: newHypothesis.key_insights.length,
-      lastUpdate: new Date().toISOString()
-    };
-    localStorage.setItem('appStats', JSON.stringify(statsUpdate));
-    localStorage.setItem('totalHypotheses', statsUpdate.hypotheses.toString());
+    if (typeof window !== "undefined") {
+      // Update stats in main page
+      const statsUpdate = {
+        hypotheses: parseInt(localStorage.getItem('totalHypotheses') || '0') + 1,
+        insights: newHypothesis.key_insights.length,
+        lastUpdate: new Date().toISOString()
+      };
+      localStorage.setItem('appStats', JSON.stringify(statsUpdate));
+      localStorage.setItem('totalHypotheses', statsUpdate.hypotheses.toString());
 
-    // Add to hypotheses history
-    const history = JSON.parse(localStorage.getItem('hypothesesHistory') || '[]');
-    history.push(newHypothesis);
-    localStorage.setItem('hypothesesHistory', JSON.stringify(history));
+      // Add to hypotheses history
+      const history = JSON.parse(localStorage.getItem('hypothesesHistory') || '[]');
+      history.push(newHypothesis);
+      localStorage.setItem('hypothesesHistory', JSON.stringify(history));
 
-    // Trigger updates in other components via custom event
-    const customEvent = new CustomEvent('hypothesisUpdated', { detail: newHypothesis });
-    window.dispatchEvent(customEvent);
-    
-    console.log('Updated related data:', statsUpdate);
+      // Trigger updates in other components via custom event
+      const customEvent = new CustomEvent('hypothesisUpdated', { detail: newHypothesis });
+      window.dispatchEvent(customEvent);
+      
+      console.log('Updated related data:', statsUpdate);
+    }
   };
 
   const generateHypothesis = async (isCustom = false) => {
@@ -141,7 +148,9 @@ export const HypothesisGenerator = () => {
       };
 
       // Save to localStorage for persistence
-      localStorage.setItem('currentHypothesis', JSON.stringify(newHypothesis));
+      if (typeof window !== "undefined") {
+        localStorage.setItem('currentHypothesis', JSON.stringify(newHypothesis));
+      }
       setHypothesis(newHypothesis);
       
       // Update related data in other components

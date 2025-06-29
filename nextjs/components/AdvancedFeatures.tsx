@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,7 +9,7 @@ import { Progress } from "@/components/ui/progress";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useQuery } from '@apollo/client';
-import { GET_REAL_TIME_ANALYTICS } from '@/graphql/queries';
+// import { GET_REAL_TIME_ANALYTICS } from '@/graphql/queries';
 import { useAdvancedVoiceCommands } from '@/hooks/useAdvancedVoiceCommands';
 import { useRealTimeCollaboration } from '@/hooks/useRealTimeCollaboration';
 import { exportToPDF } from '@/utils/pdfExport';
@@ -42,7 +44,12 @@ import { useToast } from "@/hooks/use-toast";
 
 export const AdvancedFeatures = () => {
   const [currentHypothesisId] = useState('current-hypothesis-001');
-  const [groqApiKey, setGroqApiKey] = useState(localStorage.getItem('groqApiKey') || '');
+  const [groqApiKey, setGroqApiKey] = useState(() => {
+    if (typeof window !== "undefined") {
+      return localStorage.getItem('groqApiKey') || '';
+    }
+    return '';
+  });
   const [showApiKey, setShowApiKey] = useState(false);
   const [realAnalytics, setRealAnalytics] = useState({
     impactScore: 0,
@@ -55,25 +62,27 @@ export const AdvancedFeatures = () => {
 
   // Real-time analytics calculation based on actual hypothesis data
   const calculateRealAnalytics = () => {
-    const currentHypothesis = localStorage.getItem('currentHypothesis');
-    if (currentHypothesis) {
-      const hypothesis = JSON.parse(currentHypothesis);
-      const keyInsights = hypothesis.key_insights?.length || 0;
-      const confidenceScore = hypothesis.confidence_score || 0;
-      const textLength = hypothesis.hypothesis_text?.length || 0;
-      
-      // Calculate real scores based on actual data
-      const impactScore = Math.min(95, Math.floor((keyInsights * 15) + (textLength / 20) + 20));
-      const velocityScore = Math.min(90, Math.floor((keyInsights * 12) + (confidenceScore / 2)));
-      const reputationTokens = Math.floor(impactScore * 12 + velocityScore * 8);
-      
-      setRealAnalytics({
-        impactScore,
-        confidenceScore,
-        velocityScore,
-        reputationTokens,
-        lastUpdated: new Date().toISOString()
-      });
+    if (typeof window !== "undefined") {
+      const currentHypothesis = localStorage.getItem('currentHypothesis');
+      if (currentHypothesis) {
+        const hypothesis = JSON.parse(currentHypothesis);
+        const keyInsights = hypothesis.key_insights?.length || 0;
+        const confidenceScore = hypothesis.confidence_score || 0;
+        const textLength = hypothesis.hypothesis_text?.length || 0;
+        
+        // Calculate real scores based on actual data
+        const impactScore = Math.min(95, Math.floor((keyInsights * 15) + (textLength / 20) + 20));
+        const velocityScore = Math.min(90, Math.floor((keyInsights * 12) + (confidenceScore / 2)));
+        const reputationTokens = Math.floor(impactScore * 12 + velocityScore * 8);
+        
+        setRealAnalytics({
+          impactScore,
+          confidenceScore,
+          velocityScore,
+          reputationTokens,
+          lastUpdated: new Date().toISOString()
+        });
+      }
     }
   };
 
@@ -107,7 +116,9 @@ export const AdvancedFeatures = () => {
 
   const handleApiKeyChange = (key: string) => {
     setGroqApiKey(key);
-    localStorage.setItem('groqApiKey', key);
+    if (typeof window !== "undefined") {
+      localStorage.setItem('groqApiKey', key);
+    }
     toast({
       title: "🔑 API Key Saved",
       description: "Groq API key has been saved locally",
@@ -171,10 +182,12 @@ export const AdvancedFeatures = () => {
         created_at: new Date().toISOString()
       };
 
-      localStorage.setItem('currentHypothesis', JSON.stringify(hypothesis));
-      
-      // Trigger knowledge graph update
-      window.dispatchEvent(new CustomEvent('hypothesisUpdated', { detail: hypothesis }));
+      if (typeof window !== "undefined") {
+        localStorage.setItem('currentHypothesis', JSON.stringify(hypothesis));
+        
+        // Trigger knowledge graph update
+        window.dispatchEvent(new CustomEvent('hypothesisUpdated', { detail: hypothesis }));
+      }
       
       calculateRealAnalytics();
       

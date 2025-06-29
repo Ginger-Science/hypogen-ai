@@ -1,3 +1,5 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "../components/ui/card";
 import { ChartContainer, ChartTooltip, ChartTooltipContent } from "../components/ui/chart";
@@ -40,133 +42,145 @@ interface AnalyticsData {
 
 export const AnalyticsCharts = () => {
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData>(() => {
-    const saved = localStorage.getItem('analyticsData');
-    return saved ? JSON.parse(saved) : null;
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem('analyticsData');
+      return saved ? JSON.parse(saved) : null;
+    }
+    return null;
   });
 
   const generateDynamicAnalytics = (hypothesis?: Hypothesis | null) => {
     console.log('Generating dynamic analytics for hypothesis:', hypothesis);
     
-    // Get existing hypotheses count
-    const existingHypotheses = JSON.parse(localStorage.getItem('hypothesesHistory') || '[]');
-    const totalCount = existingHypotheses.length + (hypothesis ? 1 : 0);
-    
-    // Generate dynamic monthly data
-    const monthlyData = [];
-    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
-    for (let i = 0; i < 6; i++) {
-      const baseCount = Math.floor(Math.random() * 5) + i * 2;
-      const accuracy = hypothesis ? 
-        Math.min(95, Math.max(75, hypothesis.confidence_score + Math.floor(Math.random() * 10) - 5)) :
-        Math.floor(Math.random() * 20) + 75;
+    if (typeof window !== "undefined") {
+      // Get existing hypotheses count
+      const existingHypotheses = JSON.parse(localStorage.getItem('hypothesesHistory') || '[]');
+      const totalCount = existingHypotheses.length + (hypothesis ? 1 : 0);
       
-      monthlyData.push({
-        month: months[i],
-        count: baseCount + (i === 5 ? totalCount : 0),
-        accuracy: accuracy
-      });
-    }
-
-    // Generate categories based on hypothesis content
-    let categories = [
-      { name: 'Genetics', value: 30, color: '#ea580c' },
-      { name: 'Medical', value: 25, color: '#fb923c' },
-      { name: 'Cultural', value: 20, color: '#fed7aa' },
-      { name: 'Social', value: 15, color: '#ffedd5' },
-      { name: 'Other', value: 10, color: '#fff7ed' }
-    ];
-
-    if (hypothesis) {
-      const text = hypothesis.hypothesis_text.toLowerCase();
-      if (text.includes('gene') || text.includes('genetic') || text.includes('dna')) {
-        categories[0].value = Math.min(50, categories[0].value + 15);
+      // Generate dynamic monthly data
+      const monthlyData = [];
+      const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'];
+      for (let i = 0; i < 6; i++) {
+        const baseCount = Math.floor(Math.random() * 5) + i * 2;
+        const accuracy = hypothesis ? 
+          Math.min(95, Math.max(75, hypothesis.confidence_score + Math.floor(Math.random() * 10) - 5)) :
+          Math.floor(Math.random() * 20) + 75;
+        
+        monthlyData.push({
+          month: months[i],
+          count: baseCount + (i === 5 ? totalCount : 0),
+          accuracy: accuracy
+        });
       }
-      if (text.includes('medical') || text.includes('health') || text.includes('pain')) {
-        categories[1].value = Math.min(40, categories[1].value + 10);
-      }
-      if (text.includes('cultural') || text.includes('tradition') || text.includes('society')) {
-        categories[2].value = Math.min(35, categories[2].value + 8);
-      }
-    }
 
-    // Generate research trends based on hypothesis insights
-    const baseTrends = [
-      { topic: 'MC1R Gene Research', publications: 45, citations: 1200 },
-      { topic: 'Pain Sensitivity Studies', publications: 32, citations: 890 },
-      { topic: 'Vitamin D Synthesis', publications: 28, citations: 756 },
-      { topic: 'Celtic Population Genetics', publications: 22, citations: 543 },
-      { topic: 'Phenotype Correlations', publications: 18, citations: 421 }
-    ];
+      // Generate categories based on hypothesis content
+      let categories = [
+        { name: 'Genetics', value: 30, color: '#ea580c' },
+        { name: 'Medical', value: 25, color: '#fb923c' },
+        { name: 'Cultural', value: 20, color: '#fed7aa' },
+        { name: 'Social', value: 15, color: '#ffedd5' },
+        { name: 'Other', value: 10, color: '#fff7ed' }
+      ];
 
-    if (hypothesis && hypothesis.key_insights.length > 0) {
-      // Add dynamic trends based on insights
-      hypothesis.key_insights.forEach((insight, index) => {
-        if (index < 2) { // Add top 2 insights as new trends
-          const words = insight.split(' ').slice(0, 3).join(' ');
-          baseTrends.unshift({
-            topic: words,
-            publications: Math.floor(Math.random() * 20) + 15,
-            citations: Math.floor(Math.random() * 400) + 300
-          });
+      if (hypothesis) {
+        const text = hypothesis.hypothesis_text.toLowerCase();
+        if (text.includes('gene') || text.includes('genetic') || text.includes('dna')) {
+          categories[0].value = Math.min(50, categories[0].value + 15);
         }
-      });
+        if (text.includes('medical') || text.includes('health') || text.includes('pain')) {
+          categories[1].value = Math.min(40, categories[1].value + 10);
+        }
+        if (text.includes('cultural') || text.includes('tradition') || text.includes('society')) {
+          categories[2].value = Math.min(35, categories[2].value + 8);
+        }
+      }
+
+      // Generate research trends based on hypothesis insights
+      const baseTrends = [
+        { topic: 'MC1R Gene Research', publications: 45, citations: 1200 },
+        { topic: 'Pain Sensitivity Studies', publications: 32, citations: 890 },
+        { topic: 'Vitamin D Synthesis', publications: 28, citations: 756 },
+        { topic: 'Celtic Population Genetics', publications: 22, citations: 543 },
+        { topic: 'Phenotype Correlations', publications: 18, citations: 421 }
+      ];
+
+      if (hypothesis && hypothesis.key_insights.length > 0) {
+        // Add dynamic trends based on insights
+        hypothesis.key_insights.forEach((insight, index) => {
+          if (index < 2) { // Add top 2 insights as new trends
+            const words = insight.split(' ').slice(0, 3).join(' ');
+            baseTrends.unshift({
+              topic: words,
+              publications: Math.floor(Math.random() * 20) + 15,
+              citations: Math.floor(Math.random() * 400) + 300
+            });
+          }
+        });
+      }
+
+      const avgAccuracy = monthlyData.reduce((acc, curr) => acc + curr.accuracy, 0) / monthlyData.length;
+
+      const newAnalytics: AnalyticsData = {
+        hypothesesData: monthlyData,
+        categoryData: categories,
+        researchTrends: baseTrends.slice(0, 5),
+        totalHypotheses: totalCount,
+        avgAccuracy: Math.round(avgAccuracy),
+        lastUpdated: new Date().toISOString()
+      };
+
+      setAnalyticsData(newAnalytics);
+      localStorage.setItem('analyticsData', JSON.stringify(newAnalytics));
+      return newAnalytics;
     }
-
-    const avgAccuracy = monthlyData.reduce((acc, curr) => acc + curr.accuracy, 0) / monthlyData.length;
-
-    const newAnalytics: AnalyticsData = {
-      hypothesesData: monthlyData,
-      categoryData: categories,
-      researchTrends: baseTrends.slice(0, 5),
-      totalHypotheses: totalCount,
-      avgAccuracy: Math.round(avgAccuracy),
-      lastUpdated: new Date().toISOString()
-    };
-
-    setAnalyticsData(newAnalytics);
-    localStorage.setItem('analyticsData', JSON.stringify(newAnalytics));
-    return newAnalytics;
+    return null;
   };
 
   const refreshAnalytics = () => {
-    const currentHypothesis = localStorage.getItem('currentHypothesis');
-    const hypothesis = currentHypothesis ? JSON.parse(currentHypothesis) : null;
-    generateDynamicAnalytics(hypothesis);
-  };
-
-  useEffect(() => {
-    // Listen for hypothesis changes
-    const handleStorageChange = () => {
-      const currentHypothesis = localStorage.getItem('currentHypothesis');
-      if (currentHypothesis) {
-        const hypothesis = JSON.parse(currentHypothesis);
-        generateDynamicAnalytics(hypothesis);
-      }
-    };
-
-    window.addEventListener('storage', handleStorageChange);
-    
-    // Initial load or refresh if no data
-    if (!analyticsData) {
+    if (typeof window !== "undefined") {
       const currentHypothesis = localStorage.getItem('currentHypothesis');
       const hypothesis = currentHypothesis ? JSON.parse(currentHypothesis) : null;
       generateDynamicAnalytics(hypothesis);
     }
+  };
 
-    return () => window.removeEventListener('storage', handleStorageChange);
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Listen for hypothesis changes
+      const handleStorageChange = () => {
+        const currentHypothesis = localStorage.getItem('currentHypothesis');
+        if (currentHypothesis) {
+          const hypothesis = JSON.parse(currentHypothesis);
+          generateDynamicAnalytics(hypothesis);
+        }
+      };
+
+      window.addEventListener('storage', handleStorageChange);
+      
+      // Initial load or refresh if no data
+      if (!analyticsData) {
+        const currentHypothesis = localStorage.getItem('currentHypothesis');
+        const hypothesis = currentHypothesis ? JSON.parse(currentHypothesis) : null;
+        generateDynamicAnalytics(hypothesis);
+      }
+
+      return () => window.removeEventListener('storage', handleStorageChange);
+    }
   }, []);
 
   // Trigger update when component becomes visible
   useEffect(() => {
-    const currentHypothesis = localStorage.getItem('currentHypothesis');
-    if (currentHypothesis && analyticsData) {
-      const hypothesis = JSON.parse(currentHypothesis);
-      const lastUpdate = new Date(analyticsData.lastUpdated).getTime();
-      const hypothesisTime = new Date(hypothesis.created_at).getTime();
-      
-      // Update if hypothesis is newer than last analytics update
-      if (hypothesisTime > lastUpdate) {
-        generateDynamicAnalytics(hypothesis);
+    if (typeof window !== "undefined") {
+      const currentHypothesis = localStorage.getItem('currentHypothesis');
+      if (currentHypothesis && analyticsData) {
+        const hypothesis = JSON.parse(currentHypothesis);
+        const lastUpdate = new Date(analyticsData.lastUpdated).getTime();
+        const hypothesisTime = new Date(hypothesis.created_at).getTime();
+        
+        // Update if hypothesis is newer than last analytics update
+        if (hypothesisTime > lastUpdate) {
+          generateDynamicAnalytics(hypothesis);
+        }
       }
     }
   }, []);
